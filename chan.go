@@ -7,19 +7,26 @@ import (
 		"database/sql"
 )
 
+	
+
+type ImageBoard struct {
+	db *sql.DB
+}
+
 func main(){
 	db, err := sql.Open("sqlite3", "./imageboard.db")
 	if err != nil{
 		log.Fatal(err)
 	}
+	i := &ImageBoard{db}
 
-	newPost(db, "Post Subject method test", "Anon", "First method post", 3)
-	latestThreads(db)
-	
+
+	i.newPost("Post Subject method test", "Anon", "First method post", 3)
+	i.latestThreads()
 }
 
-func newPost(db *sql.DB, subject string, name string, text string, thread_id int) {
-	tx, err := db.Begin()
+func (i *ImageBoard) newPost(subject string, name string, text string, thread_id int) {
+	tx, err := i.db.Begin()
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -35,8 +42,8 @@ func newPost(db *sql.DB, subject string, name string, text string, thread_id int
 	tx.Commit()
 }
 
-func latestThreads(db *sql.DB){
-	latest_threads, err := db.Query("SELECT * FROM latest_threads")
+func (i *ImageBoard) latestThreads(){
+	latest_threads, err := i.db.Query("SELECT * FROM latest_threads")
 	if err != nil{
 		log.Fatal(err)
 	}
