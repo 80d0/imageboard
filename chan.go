@@ -5,6 +5,7 @@ import (
 		"log"
 		_ "github.com/mattn/go-sqlite3"
 		"database/sql"
+		"net/http"
 )
 
 	
@@ -20,9 +21,9 @@ func main(){
 	}
 	i := &ImageBoard{db}
 
-
-	i.newPost("Post Subject method test", "Anon", "First method post", 3)
-	i.latestThreads()
+	//i.newPost("Post Subject method test", "Anon", "First method post", 3)
+	http.HandleFunc("/", i.latestThreads)
+	http.ListenAndServe(":8080", nil)
 }
 
 func (i *ImageBoard) newPost(subject string, name string, text string, thread_id int) {
@@ -42,7 +43,7 @@ func (i *ImageBoard) newPost(subject string, name string, text string, thread_id
 	tx.Commit()
 }
 
-func (i *ImageBoard) latestThreads(){
+func (i *ImageBoard) latestThreads(w http.ResponseWriter, r *http.Request){
 	latest_threads, err := i.db.Query("SELECT * FROM latest_threads")
 	if err != nil{
 		log.Fatal(err)
@@ -55,7 +56,7 @@ func (i *ImageBoard) latestThreads(){
 		var text string
 		var date_posted string
 		latest_threads.Scan(&threadID, &subject, &name, &text, &date_posted) 
-		fmt.Println(threadID, subject, name, text, date_posted)
+		fmt.Fprintf(w, "<h1>%d</h1><h1>%s</h1><h1>%s</h1><p>%s</p><p>%s</p>", threadID, subject, name, text, date_posted)
 	}
 	latest_threads.Close()
 }
