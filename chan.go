@@ -1,10 +1,10 @@
 package main
 
 import (
-		"database/sql"
 		"fmt"
-		_ "github.com/mattn/go-sqlite3"
 		"log"
+		_ "github.com/mattn/go-sqlite3"
+		"database/sql"
 )
 
 func main(){
@@ -12,33 +12,30 @@ func main(){
 	if err != nil{
 		log.Fatal(err)
 	}
-	defer db.Close()
 
+	newPost(db, "Post Subject method test", "Anon", "First method post", 3)
+	latestThreads(db)
+	
+}
+
+func newPost(db *sql.DB, subject string, name string, text string, thread_id int) {
 	tx, err := db.Begin()
 	if err != nil {
 		log.Fatal(err)
 	}
-
 	stmt, err := tx.Prepare("INSERT INTO post(subject, name, text, thread_id) VALUES(?, ?, ?, ?)")
 	if err != nil {
 		log.Fatal(err)
 	}
 	defer stmt.Close()
-	
-	_, err = stmt.Exec("Thread Subject", "Zach", "A new thread.", 1)
-	if err != nil{
-		log.Fatal(err)
-	}
-	_, err = stmt.Exec("Post Subject", "Anonymous", "A new post.", 1)
-	if err != nil{
-		log.Fatal(err)
-	}
-	_, err = stmt.Exec("Post Subject 2", "Anonymous", "Another new thread.", 2)
+	_, err = stmt.Exec(subject, name, text, thread_id)
 	if err != nil{
 		log.Fatal(err)
 	}
 	tx.Commit()
+}
 
+func latestThreads(db *sql.DB){
 	latest_threads, err := db.Query("SELECT * FROM latest_threads")
 	if err != nil{
 		log.Fatal(err)
