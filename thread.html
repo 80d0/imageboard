@@ -1,0 +1,16 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<title> Test </title>
+	</head>
+	<body>
+		{{range .}}
+		<div>{{.ThreadID}}</div>
+		<h3>{{.Subject}}</h3>
+		<h3>{{.Name}}</h3>
+		<div>{{.DatePosted}}</div>
+		<div><p>{{.Text}}</p></div>
+		<br /><br />
+		{{end}}
+	</body>
+</html>
