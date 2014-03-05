@@ -1,10 +1,12 @@
 <!DOCTYPE html>
 <html>
 	<head>
-		<title> Test </title>
+		<title> Test - Homepage </title>
 	</head>
 	<body>
+		Show all OP on this page.
 		{{range .}}
+		<div><a href="/reply/{{.ThreadID}}">Read Replies</a></div>
 		<h3>{{.Subject}}</h3>
 		<h3>{{.Name}}</h3>
 		<div>{{.DatePosted}}</div>

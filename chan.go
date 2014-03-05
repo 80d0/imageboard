@@ -35,6 +35,7 @@ func main(){
 
 	i.newPost("Post Subject method test", "Anon", "First method post", 2)
 	http.HandleFunc("/", i.latestThreads)
+	http.HandleFunc("/reply/", i.viewReplies)
 	http.ListenAndServe(":8080", nil)
 }
 
@@ -69,6 +70,37 @@ func (i *ImageBoard) latestThreads(w http.ResponseWriter, r *http.Request){
 		var text string
 		var date_posted string
 		latest_threads.Scan(&threadID, &subject, &name, &text, &date_posted) 
+		post := Post{
+			threadID,
+			subject,
+			name,
+			text,
+			date_posted,
+		}
+		posts = append(posts, post)
+	}
+	t, error := template.ParseFiles("index.html")
+	if error != nil{
+		log.Fatal(error)
+	}
+	t.Execute(w, posts)
+}
+
+func (i *ImageBoard) viewReplies(w http.ResponseWriter, r *http.Request){
+	threadID := r.URL.Path[len("/reply/"):]
+	replies, err := i.db.Query("SELECT * FROM latest_threads where thread_id="+threadID);
+	if err != nil{
+		log.Fatal(err)
+	}
+	posts := []Post{}
+	defer replies.Close()
+	for replies.Next(){
+		var threadID int
+		var subject string
+		var name string
+		var text string
+		var date_posted string
+		replies.Scan(&threadID, &subject, &name, &text, &date_posted) 
 		post := Post{
 			threadID,
 			subject,
