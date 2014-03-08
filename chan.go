@@ -6,6 +6,7 @@ import (
 		"database/sql"
 		"net/http"
 		"html/template"
+		"strconv"
 )
 
 type ImageBoard struct {
@@ -33,9 +34,10 @@ func main(){
 	}
 	i := &ImageBoard{db}
 
-	i.newPost("Post Subject method test", "Anon", "First method post", 2)
+	//i.newPost("Post Subject method test", "Anon", "First method post", 2)
 	http.HandleFunc("/", i.latestThreads)
 	http.HandleFunc("/reply/", i.viewReplies)
+	http.HandleFunc("/post/", i.newPostHandler)
 	http.ListenAndServe(":8080", nil)
 }
 
@@ -115,6 +117,19 @@ func (i *ImageBoard) viewReplies(w http.ResponseWriter, r *http.Request){
 		log.Fatal(error)
 	}
 	t.Execute(w, posts)
+}
+
+func (i *ImageBoard) newPostHandler(w http.ResponseWriter, r *http.Request){
+	threadIDstring := r.URL.Path[len("/post/"):]
+	threadID, err := strconv.Atoi(threadIDstring)
+	if err != nil {
+		log.Fatal(err)
+	}
+	subject := r.FormValue("subject");
+	name := r.FormValue("name");
+	message := r.FormValue("message");
+	i.newPost(subject, name, message, threadID);
+	http.Redirect(w, r, "/reply/"+threadIDstring, http.StatusFound)
 }
 
 /*

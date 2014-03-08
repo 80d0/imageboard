@@ -4,12 +4,25 @@
 		<title> Test </title>
 	</head>
 	<body>
-		{{range .}}
-		<h3>{{.Subject}}</h3>
-		<h3>{{.Name}}</h3>
-		<div>{{.DatePosted}}</div>
-		<div><p>{{.Text}}</p></div>
-		<br /><br />
-		{{end}}
+		<div>
+			<h2>Reply</h2>
+			{{range .}}
+			<form action="/post/{{$threadID}}" method="POST">
+			<input type="text" name="subject" />
+			<input type="text" name="name" value="Anonymous" />
+			<input type="text" name="message" />
+			<input type="submit" value="submit" />
+			</form>
+		</div>
+		<div>
+			{{range .}}
+			{{$threadID = .ThreadID}}
+			<h3>{{.Subject}}</h3>
+			<h3>{{.Name}}</h3>
+			<div>{{.DatePosted}}</div>
+			<div><p>{{.Text}}</p></div>
+			<br /><br />
+			{{end}}
+		</div>
 	</body>
 </html>
