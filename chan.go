@@ -27,6 +27,15 @@ func (p *Post) Name()       string { return p.name        }
 func (p *Post) Text()       string { return p.text        }
 func (p *Post) DatePosted() string { return p.date_posted }
 
+type PostList []*Post
+func (p PostList) ThreadId() int{
+	if(len(p) == 0){
+		return 0
+	}
+	return p[0].ThreadID()
+}
+
+
 func main(){
 	db, err := sql.Open("sqlite3", "./imageboard.db")
 	if err != nil{
@@ -89,8 +98,8 @@ func (i *ImageBoard) latestThreads(w http.ResponseWriter, r *http.Request){
 }
 
 func (i *ImageBoard) viewReplies(w http.ResponseWriter, r *http.Request){
-	threadID := r.URL.Path[len("/reply/"):]
-	replies, err := i.db.Query("SELECT * FROM latest_threads where thread_id="+threadID);
+	threadID, _ := strconv.Atoi(r.URL.Path[len("/reply/"):])
+	replies, err := i.db.Query("SELECT * FROM latest_threads where thread_id="+strconv.Itoa(threadID));
 	if err != nil{
 		log.Fatal(err)
 	}
@@ -112,11 +121,18 @@ func (i *ImageBoard) viewReplies(w http.ResponseWriter, r *http.Request){
 		}
 		posts = append(posts, post)
 	}
+	layoutData := struct {
+    	ThreadID int
+    	Posts []Post
+	} {
+    	ThreadID: threadID,
+    	Posts: posts,
+	}
 	t, error := template.ParseFiles("thread.html")
 	if error != nil{
 		log.Fatal(error)
 	}
-	t.Execute(w, posts)
+	t.Execute(w, layoutData)
 }
 
 func (i *ImageBoard) newPostHandler(w http.ResponseWriter, r *http.Request){

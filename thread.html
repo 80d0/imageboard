@@ -6,21 +6,22 @@
 	<body>
 		<div>
 			<h2>Reply</h2>
-			{{range .}}
-			<form action="/post/{{$threadID}}" method="POST">
-			<input type="text" name="subject" />
-			<input type="text" name="name" value="Anonymous" />
-			<input type="text" name="message" />
+			<form action="/post/{{.ThreadID}}" method="POST"> 
+			Subject:
+			<input type="text" name="subject" /> <br />
+			Name:
+			<input type="text" name="name" value="Anonymous" /> <br />
+			Reply:
+			<input type="text" name="message" /> <br />
 			<input type="submit" value="submit" />
 			</form>
 		</div>
 		<div>
-			{{range .}}
-			{{$threadID = .ThreadID}}
-			<h3>{{.Subject}}</h3>
-			<h3>{{.Name}}</h3>
-			<div>{{.DatePosted}}</div>
-			<div><p>{{.Text}}</p></div>
+			{{range $post := .Posts}}
+			<h3>{{$post.Subject}}</h3>
+			<h3>{{$post.Name}}</h3>
+			<div>{{$post.DatePosted}}</div>
+			<div><p>{{$post.Text}}</p></div>
 			<br /><br />
 			{{end}}
 		</div>
