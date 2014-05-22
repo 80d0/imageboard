@@ -27,14 +27,6 @@ func (p *Post) Name()       string { return p.name        }
 func (p *Post) Text()       string { return p.text        }
 func (p *Post) DatePosted() string { return p.date_posted }
 
-type PostList []*Post
-func (p PostList) ThreadId() int{
-	if(len(p) == 0){
-		return 0
-	}
-	return p[0].ThreadID()
-}
-
 
 func main(){
 	db, err := sql.Open("sqlite3", "./imageboard.db")
@@ -46,7 +38,8 @@ func main(){
 	//i.newPost("Post Subject method test", "Anon", "First method post", 2)
 	http.HandleFunc("/", i.latestThreads)
 	http.HandleFunc("/reply/", i.viewReplies)
-	http.HandleFunc("/post/", i.newPostHandler)
+	http.HandleFunc("/postreply/", i.newPostHandler)
+	http.HandleFunc("/newthread/", i.newThread)
 	http.ListenAndServe(":8080", nil)
 }
 
@@ -67,6 +60,23 @@ func (i *ImageBoard) newPost(subject string, name string, text string, thread_id
 	tx.Commit()
 }
 
+func (i *ImageBoard) newThread(w http.ResponseWriter, r *http.Request){
+	subject := r.FormValue("subject")
+	name := r.FormValue("name")
+	message := r.FormValue("message")
+
+	var thread_id int
+
+	err := i.db.QueryRow("SELECT MAX(thread_id) FROM post").Scan(&thread_id)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	threadID := thread_id + 1
+	i.newPost(subject, name, message, threadID)
+	http.Redirect(w, r, "/", http.StatusFound)
+}
+
 func (i *ImageBoard) latestThreads(w http.ResponseWriter, r *http.Request){
 	latest_threads, err := i.db.Query("SELECT * FROM latest_threads GROUP BY thread_id")
 	if err != nil{
@@ -80,7 +90,7 @@ func (i *ImageBoard) latestThreads(w http.ResponseWriter, r *http.Request){
 		var name string
 		var text string
 		var date_posted string
-		latest_threads.Scan(&threadID, &subject, &name, &text, &date_posted) 
+		latest_threads.Scan(&threadID, &subject, &name, &text, &date_posted)
 		post := Post{
 			threadID,
 			subject,
@@ -111,7 +121,7 @@ func (i *ImageBoard) viewReplies(w http.ResponseWriter, r *http.Request){
 		var name string
 		var text string
 		var date_posted string
-		replies.Scan(&threadID, &subject, &name, &text, &date_posted) 
+		replies.Scan(&threadID, &subject, &name, &text, &date_posted)
 		post := Post{
 			threadID,
 			subject,
@@ -122,11 +132,11 @@ func (i *ImageBoard) viewReplies(w http.ResponseWriter, r *http.Request){
 		posts = append(posts, post)
 	}
 	layoutData := struct {
-    	ThreadID int
-    	Posts []Post
+		ThreadID int
+		Posts []Post
 	} {
-    	ThreadID: threadID,
-    	Posts: posts,
+		ThreadID: threadID,
+		Posts: posts,
 	}
 	t, error := template.ParseFiles("thread.html")
 	if error != nil{
@@ -136,7 +146,7 @@ func (i *ImageBoard) viewReplies(w http.ResponseWriter, r *http.Request){
 }
 
 func (i *ImageBoard) newPostHandler(w http.ResponseWriter, r *http.Request){
-	threadIDstring := r.URL.Path[len("/post/"):]
+	threadIDstring := r.URL.Path[len("/postreply/"):]
 	threadID, err := strconv.Atoi(threadIDstring)
 	if err != nil {
 		log.Fatal(err)
@@ -148,7 +158,3 @@ func (i *ImageBoard) newPostHandler(w http.ResponseWriter, r *http.Request){
 	http.Redirect(w, r, "/reply/"+threadIDstring, http.StatusFound)
 }
 
-/*
-SELECT * FROM latest_threads GROUP BY thread_id;
-SELECT * FROM latest_threads
-*/

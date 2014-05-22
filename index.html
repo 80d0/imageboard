@@ -1,9 +1,18 @@
 <!DOCTYPE html>
-<html>
+ <html>
 	<head>
 		<title> Test - Homepage </title>
 	</head>
 	<body>
+	 <form action="/newthread/" method="POST"> 
+		Subject:
+		<input type="text" name="subject" /> <br />
+		Name:
+		<input type="text" name="name" value="Anonymous" /> <br />
+		Post:
+		<input type="text" name="message" /> <br />
+		<input type="submit" value="submit" />
+	 </form>
 		Show all OP on this page.
 		{{range .}}
 		<div><a href="/reply/{{.ThreadID}}">Reply</a></div>
