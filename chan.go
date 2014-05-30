@@ -38,7 +38,7 @@ func main(){
 	//i.newPost("Post Subject method test", "Anon", "First method post", 2)
 	http.HandleFunc("/", i.latestThreads)
 	http.HandleFunc("/reply/", i.viewReplies)
-	http.HandleFunc("/postreply/", i.newPostHandler)
+	http.HandleFunc("/newreply/", i.newReply)
 	http.HandleFunc("/newthread/", i.newThread)
 	http.ListenAndServe(":8080", nil)
 }
@@ -145,16 +145,16 @@ func (i *ImageBoard) viewReplies(w http.ResponseWriter, r *http.Request){
 	t.Execute(w, layoutData)
 }
 
-func (i *ImageBoard) newPostHandler(w http.ResponseWriter, r *http.Request){
-	threadIDstring := r.URL.Path[len("/postreply/"):]
+func (i *ImageBoard) newReply(w http.ResponseWriter, r *http.Request){
+	threadIDstring := r.URL.Path[len("/newreply/"):]
 	threadID, err := strconv.Atoi(threadIDstring)
 	if err != nil {
 		log.Fatal(err)
 	}
-	subject := r.FormValue("subject");
-	name := r.FormValue("name");
-	message := r.FormValue("message");
-	i.newPost(subject, name, message, threadID);
+	subject := r.FormValue("subject")
+	name := r.FormValue("name")
+	message := r.FormValue("message")
+	i.newPost(subject, name, message, threadID)
 	http.Redirect(w, r, "/reply/"+threadIDstring, http.StatusFound)
 }
 
