@@ -78,7 +78,7 @@ func (i *ImageBoard) newThread(w http.ResponseWriter, r *http.Request){
 }
 
 func (i *ImageBoard) latestThreads(w http.ResponseWriter, r *http.Request){
-	latest_threads, err := i.db.Query("SELECT * FROM latest_threads GROUP BY thread_id")
+	latest_threads, err := i.db.Query("SELECT * FROM latest_threads GROUP BY thread_id ORDER BY date_posted ASC")
 	if err != nil{
 		log.Fatal(err)
 	}
@@ -109,7 +109,7 @@ func (i *ImageBoard) latestThreads(w http.ResponseWriter, r *http.Request){
 
 func (i *ImageBoard) viewReplies(w http.ResponseWriter, r *http.Request){
 	threadID, _ := strconv.Atoi(r.URL.Path[len("/reply/"):])
-	replies, err := i.db.Query("SELECT * FROM latest_threads where thread_id="+strconv.Itoa(threadID));
+	replies, err := i.db.Query("SELECT * FROM latest_threads where thread_id="+strconv.Itoa(threadID)+" ORDER BY date_posted");
 	if err != nil{
 		log.Fatal(err)
 	}

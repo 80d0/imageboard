@@ -8,8 +8,8 @@
 			 
 			CREATE TABLE IF NOT EXISTS post (
 			        id INTEGER PRIMARY KEY AUTOINCREMENT,
-			        subject VARCHAR(30) DEFAULT null,
-			        name VARCHAR(30),
+			        subject TEXT DEFAULT null,
+			        name TEXT,
 			        text TEXT,
 			        date_posted TEXT DEFAULT CURRENT_TIMESTAMP,
 			        thread_id INTEGER
@@ -20,7 +20,7 @@
 			CREATE VIEW IF NOT EXISTS latest_threads AS
 			        SELECT post.thread_id, post.subject, post.name, post.text, post.date_posted
 			        FROM post
-			        ORDER BY post.thread_id DESC, post.date_posted ASC;
+			        ORDER BY post.thread_id DESC, post.date_posted DESC;
 			 
 			-- only keep 5 threads
 			CREATE TRIGGER purge_old_posts
