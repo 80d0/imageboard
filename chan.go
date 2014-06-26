@@ -64,10 +64,15 @@ func (i *ImageBoard) newThread(w http.ResponseWriter, r *http.Request){
 	subject := r.FormValue("subject")
 	name := r.FormValue("name")
 	message := r.FormValue("message")
+	formFile, _, err := r.FormFile("theFile")
+	log.Print(formFile)
+	if err != nil {
+		log.Fatal(err)
+	}
 
 	var thread_id int
 
-	err := i.db.QueryRow("SELECT MAX(thread_id) FROM post").Scan(&thread_id)
+	err = i.db.QueryRow("SELECT MAX(thread_id) FROM post").Scan(&thread_id)
 	if err != nil {
 		log.Fatal(err)
 	}
